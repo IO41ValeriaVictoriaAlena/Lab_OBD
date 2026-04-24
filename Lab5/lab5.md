@@ -16,3 +16,125 @@
 - **Застосування нормалізації:** перетворення таблиць у вищі нормальні форми (до 3НФ) для усунення часткових та транзитивних залежностей.
 
 ---
+## 1. Початкова схема
+Початкова база даних складалась з таблиць:
+
+- client
+  
+- category
+  
+- brand
+
+- products
+
+- orders
+
+- order_items
+
+- payment
+
+- obd
+
+## 2. Функціональні залежності
+**client**
+
+- client_id → surname, firstname, email
+- email → client_id, surname, firstname
+
+**category**
+  
+- category_id → name
+  
+**brand**
+
+- brand_id → name, country
+
+**products**
+  
+- product_id → brand_id, category_id, name, price, model, warranty_months, stock_quantity
+
+**orders**
+  
+- order_id → client_id, order_date, status, buy_price
+
+**order_items**
+  
+- item_id → order_id, product_id, quantity, price
+
+**payment**
+  
+- payment_id → order_id, type, status
+
+**obd**
+  
+- obd_id → order_id, type, status
+
+## 3. Аналіз нормальних форм
+**1НФ**
+
+Усі таблиці містять атомарні значення, повторюваних груп немає. Схема відповідає 1НФ.
+
+**2НФ**
+
+У всіх таблицях використані прості первинні ключі, тому часткові залежності відсутні.Схема відповідає 2НФ.
+
+**3НФ**
+
+Було виявлено порушення:
+
+1. `orders.buy_price`
+
+Це обчислюване поле (сума order_items), що створює транзитивну залежність і аномалії оновлення.
+
+2. таблиця obd
+
+Дублює таблицю payment, що створює надлишковість.
+
+## 4. Нормалізація
+
+Для приведення до 3НФ виконано:
+
+- видалено поле buy_price з таблиці orders
+- видалено таблицю obd
+- додано обмеження унікальності:
+  - client.email
+  - category.name
+  - brand.name
+- додано обмеження:
+  - UNIQUE(order_id, product_id) в order_items
+  - UNIQUE(order_id) в payment
+- додано перевірки (CHECK) для цін, кількості та статусів
+  
+## 5. Фінальна схема
+
+Після нормалізації база містить таблиці:
+
+- client
+- category
+- brand
+- products
+- orders
+- order_items
+- payment
+
+Схема відповідає 3НФ, оскільки:
+
+- всі неключові атрибути залежать тільки від первинного ключа
+- відсутні транзитивні залежності
+- відсутнє дублювання даних
+
+## 6. Обчислення суми замовлення
+
+Оскільки поле `buy_price` було видалено, сума замовлення обчислюється запитом:
+
+```sql
+SELECT order_id, SUM(quantity * price) AS total
+FROM order_items
+GROUP BY order_id;
+```
+# 7. Висновок
+
+У ході роботи ми виконали нормалізацію бази даних до третьої нормальної форми. Усунули надлишковість, видалили дублюючі дані та забезпечили цілісність даних. Отримана схема є логічно коректною та відповідає вимогам 3НФ.
+
+Нова ER-діаграма:
+<img width="949" height="949" alt="image" src="https://github.com/user-attachments/assets/6e917b01-5cb4-4316-98eb-1c2b92140839" />
