@@ -59,7 +59,7 @@
 
 **order_items**
   
-- item_id → order_id, product_id, quantity, price
+- (order_id, product_id) → quantity, price_at_purchase
 
 **payment**
   
@@ -76,17 +76,17 @@
 
 **2НФ**
 
-У всіх таблицях використані прості первинні ключі, тому часткові залежності відсутні.Схема відповідає 2НФ.
+У більшості таблиць використані прості первинні ключі. У таблиці `order_items` використано складений первинний ключ `(order_id, product_id)`, і всі неключові атрибути `quantity` та `price_at_purchase` залежать від усього ключа, а не від його частини. Тому часткові залежності відсутні, і схема відповідає 2НФ.
 
 **3НФ**
 
 Було виявлено порушення:
 
-1. `orders.buy_price`
+2. `order_items.price`
 
-Це обчислюване поле (сума order_items), що створює транзитивну залежність і аномалії оновлення.
+У початковій схемі поле `price`  сприймало як дублювання `products.price`, оскільки існувала залежність `product_id → price`. Щоб уникнути транзитивної залежності та неоднозначності, поле було перейменовано на `price_at_purchase`. Воно означає не поточну ціну товару, а ціну на момент оформлення замовлення.
 
-2. таблиця obd
+3. таблиця obd
 
 Дублює таблицю payment, що створює надлишковість.
 
@@ -100,8 +100,9 @@
   - client.email
   - category.name
   - brand.name
+- у таблиці order_items замість сурогатного ключа item_id використано первинний ключ (order_id, product_id)
+- поле price перейменовано на price_at_purchase, оскільки воно зберігає ціну товару на момент покупки
 - додано обмеження:
-  - UNIQUE(order_id, product_id) в order_items
   - UNIQUE(order_id) в payment
 - додано перевірки (CHECK) для цін, кількості та статусів
   
@@ -128,7 +129,7 @@
 Оскільки поле `buy_price` було видалено, сума замовлення обчислюється запитом:
 
 ```sql
-SELECT order_id, SUM(quantity * price) AS total
+SELECT order_id, SUM(quantity * price_at_purchase) AS total
 FROM order_items
 GROUP BY order_id;
 ```
