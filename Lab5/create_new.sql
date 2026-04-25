@@ -1,3 +1,6 @@
+-- ========================
+-- DROP
+-- ========================
 DROP TABLE IF EXISTS payment CASCADE;
 DROP TABLE IF EXISTS order_items CASCADE;
 DROP TABLE IF EXISTS orders CASCADE;
@@ -6,6 +9,9 @@ DROP TABLE IF EXISTS brand CASCADE;
 DROP TABLE IF EXISTS category CASCADE;
 DROP TABLE IF EXISTS client CASCADE;
 
+-- ========================
+-- CLIENT
+-- ========================
 CREATE TABLE client (
     client_id SERIAL PRIMARY KEY,
     surname VARCHAR(100) NOT NULL,
@@ -13,17 +19,26 @@ CREATE TABLE client (
     email VARCHAR(100) NOT NULL UNIQUE
 );
 
+-- ========================
+-- CATEGORY
+-- ========================
 CREATE TABLE category (
     category_id SERIAL PRIMARY KEY,
     name VARCHAR(100) NOT NULL UNIQUE
 );
 
+-- ========================
+-- BRAND
+-- ========================
 CREATE TABLE brand (
     brand_id SERIAL PRIMARY KEY,
     name VARCHAR(100) NOT NULL UNIQUE,
     country VARCHAR(100) NOT NULL
 );
 
+-- ========================
+-- PRODUCTS
+-- ========================
 CREATE TABLE products (
     product_id SERIAL PRIMARY KEY,
     brand_id INT NOT NULL,
@@ -37,6 +52,9 @@ CREATE TABLE products (
     FOREIGN KEY (category_id) REFERENCES category(category_id)
 );
 
+-- ========================
+-- ORDERS
+-- ========================
 CREATE TABLE orders (
     order_id SERIAL PRIMARY KEY,
     client_id INT NOT NULL,
@@ -45,17 +63,24 @@ CREATE TABLE orders (
     FOREIGN KEY (client_id) REFERENCES client(client_id)
 );
 
+-- ========================
+-- ORDER ITEMS 
+-- ========================
 CREATE TABLE order_items (
-    item_id SERIAL PRIMARY KEY,
     order_id INT NOT NULL,
     product_id INT NOT NULL,
     quantity INT NOT NULL CHECK (quantity > 0),
-    price DECIMAL(10,2) NOT NULL CHECK (price >= 0),
+    price_at_purchase DECIMAL(10,2) NOT NULL CHECK (price_at_purchase >= 0),
+
+    PRIMARY KEY (order_id, product_id),
+
     FOREIGN KEY (order_id) REFERENCES orders(order_id) ON DELETE CASCADE,
-    FOREIGN KEY (product_id) REFERENCES products(product_id),
-    UNIQUE (order_id, product_id)
+    FOREIGN KEY (product_id) REFERENCES products(product_id)
 );
 
+-- ========================
+-- PAYMENT
+-- ========================
 CREATE TABLE payment (
     payment_id SERIAL PRIMARY KEY,
     order_id INT NOT NULL UNIQUE,
