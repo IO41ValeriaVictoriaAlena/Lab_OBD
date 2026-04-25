@@ -51,7 +51,7 @@ INSERT INTO orders (client_id, order_date, status) VALUES
 -- ========================
 -- ORDER ITEMS
 -- ========================
-INSERT INTO order_items (order_id, product_id, quantity, price) VALUES
+INSERT INTO order_items (order_id, product_id, quantity, price_at_purchase) VALUES
 (1, 1, 1, 1200),
 (1, 3, 2, 150),
 (2, 2, 1, 800),
