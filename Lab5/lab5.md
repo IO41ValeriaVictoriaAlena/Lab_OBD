@@ -137,4 +137,4 @@ GROUP BY order_id;
 У ході роботи ми виконали нормалізацію бази даних до третьої нормальної форми. Усунули надлишковість, видалили дублюючі дані та забезпечили цілісність даних. Отримана схема є логічно коректною та відповідає вимогам 3НФ.
 
 Нова ER-діаграма:
-<img width="949" height="949" alt="image" src="https://github.com/user-attachments/assets/6e917b01-5cb4-4316-98eb-1c2b92140839" />
+<img width="992" height="892" alt="image" src="https://github.com/user-attachments/assets/b13c5e27-a5e4-4224-be87-d2e4fb7cb136" />
