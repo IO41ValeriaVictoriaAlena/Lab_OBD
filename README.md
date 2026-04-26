@@ -5,5 +5,5 @@
 - [x] Lab 2: DDl
 - [x] Lab 3: OLTP
 - [x] Lab 4: OLAP
-- [ ] Lab 5: Normalization 
-- [ ] Lab 6: Migrations 
+- [x] Lab 5: Normalization 
+- [x] Lab 6: Migrations 
