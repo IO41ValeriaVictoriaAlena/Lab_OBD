@@ -14,4 +14,87 @@
 - Моделювання за допомогою файлів схеми Prisma - визначення таблиць та зв'язків у schema.prisma та перегляд їхнього відображення в PostgreSQL.
 - Виконати базові запити Prisma - вставити та запитати дані за допомогою клієнта Prisma (через Prisma Studio або простий скрипт) для перевірки змін.
 
-  
+## Початковий стан
+  Було використано існуючу базу даних PostgreSQL, створену в попередніх лабораторних роботах (ЛР1–ЛР5).
+
+Для інтеграції з Prisma було виконано:
+```sql
+npx prisma db pull
+```
+У результаті отримано файл schema.prisma, що відображає поточну структуру бази даних.
+
+## Початкова міграція
+Оскільки база вже існувала, було створено початкову міграцію:
+```sql
+npx prisma migrate diff --from-empty --to-schema prisma/schema.prisma --script > prisma/migrations/0_init/migration.sql
+npx prisma migrate resolve --applied 0_init
+```
+Це дозволило Prisma синхронізувати історію міграцій із реальною бази даних.
+
+## Міграція 1(додавання таблиці reviews):
+Було додано нову модель у schema.prisma:
+```sql
+model reviews {
+  review_id  Int      @id @default(autoincrement())
+  product_id Int
+  rating     Int
+  comment    String?
+  created_at DateTime @default(now())
+
+  products products @relation(fields: [product_id], references: [product_id])
+}
+```
+Також у таблиці products було додано зв’язок:
+
+`reviews reviews[]`
+
+Після цього виконано:
+```sql
+npx prisma migrate dev --name add-reviews-table
+```
+Результат: створено нову таблицю reviews у базі даних.
+<img width="1182" height="288" alt="IMAGE 2026-05-01 15:39:44" src="https://github.com/user-attachments/assets/fdd1cf0f-9de1-49ca-87bd-b03cfe20c695" />
+
+## Міграція 2 (додавання нового поля):
+У таблицю products було додано нове поле:
+```sql
+is_available Boolean @default(true)
+```
+Виконано:
+```sql
+npx prisma migrate dev --name add-is-available
+```
+Результат: у таблиці products з’явилось поле доступності товару.
+<img width="1172" height="278" alt="IMAGE 2026-05-01 15:43:39" src="https://github.com/user-attachments/assets/091ece96-62c6-4d2a-8844-de88d68736d3" />
+
+
+## Міграція 3 (видалення поля):
+Міграція 3: Видалення поля
+
+Було видалено поле:
+
+`model String?`
+
+з моделі products.
+
+Виконано:
+```sql
+npx prisma migrate dev --name remove-model-field
+```
+Результат: колонка model була видалена з таблиці.
+
+<img width="1196" height="302" alt="IMAGE 2026-05-01 15:43:52" src="https://github.com/user-attachments/assets/ecf17562-0be1-4ebe-9e6e-d5e81fc2e04c" />
+
+## Перевірка результатів
+Для перевірки змін було використано Prisma Studio:
+```sql
+npx prisma studio
+```
+Усі зміни успішно застосовані, таблиці та поля відображаються коректно.
+
+## Висновок:
+У ході виконання лабораторної роботи я навчилась працювати з Prisma ORM для керування структурою бази даних. На відміну від попередніх лабораторних, де всі зміни вносились вручну через SQL у DataGrip, у цій роботі всі зміни виконувались через файл schema.prisma та систему міграцій.
+
+Було створено початкову міграцію для вже існуючої бази даних, після чого послідовно реалізовано кілька змін: додано нову таблицю reviews, додано нове поле is_available у таблицю products, а також видалено поле model. Усі зміни застосовувались за допомогою команд Prisma, що дозволило автоматично згенерувати SQL та безпечно оновити структуру бази даних.
+
+У результаті роботи я зрозуміла принцип роботи міграцій, навчилась синхронізувати існуючу базу з Prisma та виконувати зміни структури без прямого втручання в SQL. Це значно спрощує керування базою даних і відповідає сучасним підходам розробки.
