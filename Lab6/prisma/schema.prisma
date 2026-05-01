@@ -1,0 +1,154 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model agents {
+  id             Int          @id @default(autoincrement())
+  name           String?      @db.VarChar(100)
+  phone          String?      @db.VarChar(20)
+  specialization String?      @db.VarChar(100)
+  properties     properties[]
+  sales          sales[]
+}
+
+model brand {
+  brand_id Int        @id @default(autoincrement())
+  name     String?    @db.VarChar(100)
+  country  String?    @db.VarChar(100)
+  products products[]
+}
+
+model category {
+  category_id Int        @id @default(autoincrement())
+  name        String?    @db.VarChar(100)
+  products    products[]
+}
+
+model client {
+  client_id Int      @id @default(autoincrement())
+  surname   String?  @db.VarChar(100)
+  firstname String?  @db.VarChar(100)
+  email     String?  @db.VarChar(100)
+  orders    orders[]
+}
+
+model clients {
+  id          Int          @id @default(autoincrement())
+  name        String?      @db.VarChar(100)
+  phone       String?      @db.VarChar(20)
+  client_type String?      @db.VarChar(20)
+  properties  properties[]
+  sales       sales[]
+  viewings    viewings[]
+}
+
+model obd {
+  obd_id   Int     @id @default(autoincrement())
+  order_id Int?
+  type     String? @db.VarChar(50)
+  status   String? @db.VarChar(50)
+  orders   orders? @relation(fields: [order_id], references: [order_id], onDelete: NoAction, onUpdate: NoAction)
+}
+
+model order_items {
+  item_id    Int       @id @default(autoincrement())
+  order_id   Int?
+  product_id Int?
+  quantity   Int?
+  price      Decimal?  @db.Decimal(10, 2)
+  orders     orders?   @relation(fields: [order_id], references: [order_id], onDelete: NoAction, onUpdate: NoAction)
+  products   products? @relation(fields: [product_id], references: [product_id], onDelete: NoAction, onUpdate: NoAction)
+}
+
+model orders {
+  order_id    Int           @id @default(autoincrement())
+  client_id   Int?
+  order_date  DateTime?     @db.Date
+  status      String?       @db.VarChar(50)
+  buy_price   Decimal?      @db.Decimal(10, 2)
+  obd         obd[]
+  order_items order_items[]
+  client      client?       @relation(fields: [client_id], references: [client_id], onDelete: NoAction, onUpdate: NoAction)
+  payment     payment[]
+}
+
+model payment {
+  payment_id Int     @id @default(autoincrement())
+  order_id   Int?
+  type       String? @db.VarChar(50)
+  status     String? @db.VarChar(50)
+  orders     orders? @relation(fields: [order_id], references: [order_id], onDelete: NoAction, onUpdate: NoAction)
+}
+
+model products {
+  product_id      Int           @id @default(autoincrement())
+  brand_id        Int?
+  category_id     Int?
+  name            String?       @db.VarChar(100)
+  price           Decimal?      @db.Decimal(10, 2)
+  warranty_months Int?
+  stock_quantity  Int?
+  is_available    Boolean       @default(true)
+  order_items     order_items[]
+  reviews         reviews[]
+  brand           brand?        @relation(fields: [brand_id], references: [brand_id], onDelete: NoAction, onUpdate: NoAction)
+  category        category?     @relation(fields: [category_id], references: [category_id], onDelete: NoAction, onUpdate: NoAction)
+}
+
+model properties {
+  id               Int             @id @default(autoincrement())
+  address          String?
+  property_type_id Int?
+  price            Decimal?        @db.Decimal
+  rooms            Int?
+  status           String?         @db.VarChar(20)
+  agent_id         Int?
+  owner_id         Int?
+  agents           agents?         @relation(fields: [agent_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  clients          clients?        @relation(fields: [owner_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  property_types   property_types? @relation(fields: [property_type_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  sales            sales[]
+  viewings         viewings[]
+}
+
+model property_types {
+  id         Int          @id @default(autoincrement())
+  name       String?      @db.VarChar(50)
+  properties properties[]
+}
+
+model sales {
+  id          Int         @id @default(autoincrement())
+  property_id Int?
+  buyer_id    Int?
+  agent_id    Int?
+  sale_price  Decimal?    @db.Decimal
+  sale_date   DateTime?   @db.Date
+  agents      agents?     @relation(fields: [agent_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  clients     clients?    @relation(fields: [buyer_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  properties  properties? @relation(fields: [property_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+}
+
+model viewings {
+  id           Int         @id @default(autoincrement())
+  property_id  Int?
+  client_id    Int?
+  viewing_date DateTime?   @db.Timestamp(6)
+  clients      clients?    @relation(fields: [client_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  properties   properties? @relation(fields: [property_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+}
+
+model reviews {
+  review_id  Int      @id @default(autoincrement())
+  product_id Int
+  rating     Int
+  comment    String?
+  created_at DateTime @default(now()) @db.Timestamp(6)
+
+  products products @relation(fields: [product_id], references: [product_id], onDelete: NoAction, onUpdate: NoAction)
+}
